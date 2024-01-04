@@ -5,16 +5,17 @@ import * as CloudinaryService from "../services/cloudinary.service.js";
 export const getImage = async (req, res) => {
   try {
     const base64ImageString = req.body.base64ImageString;
-    const outfitDescription = await OpenAIService.getImageDescription(
-      base64ImageString
-    );
-    const outfitData = await OpenAIService.getOutfit(outfitDescription);
-    const base64Image = await OpenAIService.getBase64Image(outfitData);
+    const descriptionText = await OpenAIService.getImageDescription(base64ImageString);
+    const paragraphs = descriptionText.split('\n\n');
+    const outfitDescription = paragraphs[0];
+    const individualDescription = paragraphs.length > 1 ? paragraphs[1] : '';
+    const improvedOutfit = await OpenAIService.getOutfit(outfitDescription);
+    const base64Image = await OpenAIService.getBase64Image(improvedOutfit, individualDescription);
     const imageUrl = await CloudinaryService.uploadBase64Image(base64Image);
 
-    const data = JSON.parse(outfitData);
+    const data = JSON.parse(improvedOutfit);
     data.imageUrl = imageUrl;
-    data.id = uuidv4(); 
+    data.id = uuidv4();
 
     return res.json(data);
   } catch (error) {

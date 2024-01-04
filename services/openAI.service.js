@@ -13,8 +13,7 @@ export const getImageDescription = async (base64ImageString) => {
       messages: [
         {
           role: "system",
-          content:
-            "Provide a detailed description of the outfit worn by the individual in the image. Focus on the clothing elements, such as the type and color of the top, pants, shoes, and any additional accessories like jewelry, hats, or bags. Describe the style and specific details of each item, like patterns, materials, and unique features. Also, include a description of the person's physical characteristics, including gender, height, build, skin tone, hair type and color, and any distinctive facial or bodily features. Ensure the description is comprehensive enough to capture the essence of their appearance and outfit, without focusing on the background or pose.",
+          content: "Based on the provided image, generate two separate paragraphs. The first paragraph should provide a detailed description of the outfit worn by the individual, focusing on the clothing elements such as the type, color, style, and specific details of the top, pants, shoes, and any accessories like jewelry, hats, or bags. The second paragraph should describe the individual's physical characteristics, including gender, height, build, skin tone, hair type and color, and any distinctive facial or bodily features. Ensure the description captures the essence of their appearance and outfit without focusing on the background or pose. The output should strictly adhere to this two-paragraph format.",
         },
         {
           role: "user",
@@ -48,6 +47,7 @@ export const getOutfit = async (outfitDescription) => {
           content: `You're a fashion expert. You'll receive an outfit description and I need to give me tips to improve it, as well as a color palette (color name and hexadecimal code) to match the outfit. You can also suggest accessories of your preference.
               The output should follow this json format:
               {
+                "name": "<name of the improved outfit in title case, with no more than 3 words>",
                 "description": "<description of the improved outfit>",
                 "tips": [
                   "tip1",
@@ -83,17 +83,17 @@ export const getOutfit = async (outfitDescription) => {
   }
 };
 
-export const getBase64Image = async (outfitData) => {
+export const getBase64Image = async (improvedOutfit, individualDescription) => {
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",
-      prompt:
-        "Generate an image of a person wearing the described improved outfit and respecting the color palette provided: " +
-        outfitData,
+      prompt: `Generate a vertical image of the described person wearing the described improved outfit and respecting the color palette provided: 
+          ${improvedOutfit}
+          ${individualDescription}
+        `,
       n: 1,
       size: "1024x1792",
       style: "vivid",
-      response_format: "url",
       quality: "hd",
       response_format: "b64_json",
     });
